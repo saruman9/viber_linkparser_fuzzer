@@ -14,8 +14,10 @@ const ptrdiff_t ADDR_COPY_JNI_STRING_FROM_STR = 0x0000000000011160;
 
 typedef struct Functions
 {
-  void *(*parse_link)(struct ParserResult *, struct String *);
-  void *(*copy_jni_string_from_str)(struct String *, const char *);
+  void (*parse_link)(struct ParserResult *, struct String *);
+  void (*copy_jni_string_from_str)(struct String *, const char *);
+  void (*binder_getInstance)();
+  void (*binder_init)();
 } Functions;
 
 int afl_libfuzzer_init()
@@ -23,12 +25,15 @@ int afl_libfuzzer_init()
   return 0;
 }
 
-struct Functions *load_function()
+struct Functions *load_functions()
 {
-  void *p_lib = dlopen("liblinkparser.so", RTLD_NOW | RTLD_GLOBAL);
-  if (p_lib != NULL)
+  void *liblinkparser = dlopen("liblinkparser.so", RTLD_NOW | RTLD_GLOBAL);
+  void *libicu_binder = dlopen("libicuBinder.so", RTLD_NOW | RTLD_GLOBAL);
+  if (liblinkparser != NULL)
   {
-    int (*JNI_OnLoad)(void *, void *) = dlsym(p_lib, "JNI_OnLoad");
+    int (*JNI_OnLoad)(void *, void *) = dlsym(liblinkparser, "JNI_OnLoad");
+    void (*binder_getInstance)() = dlsym(libicu_binder, "_ZN22IcuSqliteAndroidBinder11getInstanceEv");
+    void (*binder_init)() = dlsym(libicu_binder, "_ZN22IcuSqliteAndroidBinder4initEv");
     if (JNI_OnLoad != NULL)
     {
       Dl_info jni_on_load_info;
@@ -40,13 +45,15 @@ struct Functions *load_function()
       size_t copy_jni_string_from_str_addr = diff_copy_jni_string_from_str + jni_on_load_addr;
       printf("[i] parse_link_addr: %zX\n", parse_link_addr);
       printf("[i] copy_jni_string_from_str_addr: %zX\n", copy_jni_string_from_str_addr);
-      void *(*parse_link)(ParserResult *, String *) = (void *(*)(ParserResult *, String *))(parse_link_addr);
-      void *(*copy_jni_string_from_str)(String *, const char *) = (void *(*)(String *, const char *))(copy_jni_string_from_str_addr);
+      void (*parse_link)(ParserResult *, String *) = (void (*)(ParserResult *, String *))(parse_link_addr);
+      void (*copy_jni_string_from_str)(String *, const char *) = (void (*)(String *, const char *))(copy_jni_string_from_str_addr);
       if (parse_link != NULL && copy_jni_string_from_str != NULL)
       {
         Functions *functions = (Functions *)malloc(sizeof(Functions));
         functions->parse_link = parse_link;
         functions->copy_jni_string_from_str = copy_jni_string_from_str;
+        functions->binder_getInstance = binder_getInstance;
+        functions->binder_init = binder_init;
         return functions;
       }
       else
@@ -60,7 +67,8 @@ struct Functions *load_function()
       perror("[-] Can't find JNI_OnLoad function (dlsym)");
       return NULL;
     }
-    dlclose(p_lib);
+    dlclose(liblinkparser);
+    dlclose(libicu_binder);
   }
   else
   {
@@ -78,17 +86,40 @@ int main(int argc, char *argv[])
     printf("Usage: %s URL\n", argv[0]);
     exit(1);
   }
-  Functions *functions = load_function();
+  Functions *functions = load_functions();
   printf("[+] Functions loaded\n");
   ParserResult *parser_result = (ParserResult *)malloc(sizeof(ParserResult));
   String *url = (String *)malloc(sizeof(String));
-  functions->copy_jni_string_from_str(url, argv[1]);
-  functions->parse_link(parser_result, url);
+  functions->binder_getInstance();
+  functions->binder_init();
+  // functions->copy_jni_string_from_str(url, argv[1]);
+  // functions->parse_link(parser_result, url);
+  free(parser_result);
+  free(url);
+  free(functions);
   return 0;
 }
 #else  // TRIAGE
-int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+// int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+int main(int argc, char *argv[])
 {
+
+  Functions *functions = load_functions();
+  printf("[+] Functions loaded\n");
+  ParserResult *parser_result = (ParserResult *)malloc(sizeof(ParserResult));
+  String *url = (String *)malloc(sizeof(jni_string));
+  // char *input = (char *)malloc(size + 1);
+  // memcpy(input, data, size);
+  // input[size] = 0;
+  char input[] = {0x34, 0xf9, 0xf1, 0x65, 0x1, 0x0};
+  // functions->binder_getInstance();
+  // functions->binder_init();
+  functions->copy_jni_string_from_str(url, input);
+  functions->parse_link(parser_result, url);
+  // free(input);
+  free(parser_result);
+  free(url);
+  free(functions);
   return 0;
 }
 #endif // TRIAGE
