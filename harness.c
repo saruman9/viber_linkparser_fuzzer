@@ -5,8 +5,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <ctype.h>
 
 #include "liblinkparser.so.h"
+#include "utf8.h"
 
 const ptrdiff_t ADDR_JNI_ONLOAD = 0x0000000000011640;
 const ptrdiff_t ADDR_PARSE_LINK = 0x000000000002F870;
@@ -18,6 +21,18 @@ const uint32_t ICU_VERSION = 68;
 static void *LIBC_SHARED = NULL;
 static void *LIBICU_BINDER = NULL;
 static void *LIBLINKPARSER = NULL;
+
+bool is_ascii_str(char *str, size_t len)
+{
+  for (int i = 0; i < len; i++)
+  {
+    if (!isascii(str[i]))
+    {
+      return false;
+    }
+  }
+  return true;
+}
 
 typedef struct Functions
 {
@@ -111,17 +126,54 @@ int main(int argc, char *argv[])
 {
   if (argc < 2)
   {
-    printf("Usage: %s URL\n", argv[0]);
+    printf("Usage: %s FILE\n", argv[0]);
     exit(1);
   }
+
+  FILE *f = fopen(argv[1], "r");
+  if (f == NULL)
+  {
+    fprintf(stderr, "FILE open error\n");
+    exit(1);
+  }
+  struct stat sb;
+  stat(argv[1], &sb);
+  size_t size = sb.st_size;
+  char *input = (char *)malloc(size + 1);
+  fread(input, size, 1, f);
+  fclose(f);
+  input[size] = 0;
+
+  uint32_t state = UTF8_ACCEPT;
+  if (validate_utf8(&state, input, size) == UTF8_REJECT)
+  {
+    fprintf(stderr, "[-] Invalid UTF-8 data\n");
+    return 0;
+  }
+  else
+  {
+    printf("[i] Valid UTF-8 string\n");
+  }
+
+  if (!is_ascii_str((char *)input, size))
+  {
+    fprintf(stderr, "[-] Invalid ASCII data\n");
+    return 0;
+  }
+  else
+  {
+    printf("[i] Valid ASCII string\n");
+  }
+
   Functions *functions = load_functions();
   printf("[+] Functions loaded\n");
   ParserResult *parser_result = (ParserResult *)malloc(sizeof(ParserResult));
   String *url = (String *)malloc(sizeof(String));
   // functions->binder_getInstance();
   // functions->binder_init();
-  functions->copy_jni_string_from_str(url, argv[1]);
+  functions->copy_jni_string_from_str(url, input);
   functions->parse_link(parser_result, url);
+  free(input);
   free(parser_result);
   free(url);
   free(functions);
@@ -133,7 +185,29 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 // int main(int argc, char *argv[])
 {
   // char data[] = {0x34, 0xf9, 0xf1, 0x65, 0x1, 0x1};
-  // size_t size = 6;
+  // char data[] = "🇮🇩";
+  // size_t size = sizeof(data);
+
+  uint32_t state = UTF8_ACCEPT;
+  if (validate_utf8(&state, (char *)data, size) == UTF8_REJECT)
+  {
+    fprintf(stderr, "[-] Invalid UTF-8 data\n");
+    return 0;
+  }
+  else
+  {
+    printf("[i] Valid UTF-8 string\n");
+  }
+
+  if (!is_ascii_str((char *)data, size))
+  {
+    fprintf(stderr, "[-] Invalid ASCII data\n");
+    return 0;
+  }
+  else
+  {
+    printf("[i] Valid ASCII string\n");
+  }
 
   Functions *functions = load_functions();
   printf("[+] Functions loaded\n");
