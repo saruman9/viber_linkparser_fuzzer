@@ -121,6 +121,45 @@ void close_libraries()
   dlclose(LIBC_SHARED);
 }
 
+int fuzz(const uint8_t *data, size_t size)
+{
+  char *input = (char *)malloc(size + 1);
+  memcpy(input, data, size);
+  input[size] = 0;
+
+  if (!validate_utf8(input, size + 1))
+  {
+    fprintf(stderr, "[-] Invalid UTF-8 data\n");
+    return 0;
+  }
+  else
+  {
+    printf("[i] Valid UTF-8 string\n");
+  }
+
+  // if (!is_ascii_str((char *)data, size))
+  // {
+  //   fprintf(stderr, "[-] Invalid ASCII data\n");
+  //   return 0;
+  // }
+  // else
+  // {
+  //   printf("[i] Valid ASCII string\n");
+  // }
+
+  Functions *functions = load_functions();
+  printf("[+] Functions loaded\n");
+  ParserResult *parser_result = (ParserResult *)malloc(sizeof(ParserResult));
+  String *url = (String *)malloc(sizeof(String));
+  functions->copy_jni_string_from_str(url, input);
+  functions->parse_link(parser_result, url);
+  free(input);
+  free(parser_result);
+  free(url);
+  free(functions);
+  return 0;
+}
+
 #ifdef TRIAGE
 int main(int argc, char *argv[])
 {
@@ -139,46 +178,11 @@ int main(int argc, char *argv[])
   struct stat sb;
   stat(argv[1], &sb);
   size_t size = sb.st_size;
-  char *input = (char *)malloc(size + 1);
-  fread(input, size, 1, f);
+  uint8_t *data = (uint8_t *)malloc(size);
+  fread(data, size, 1, f);
   fclose(f);
-  input[size] = 0;
 
-  uint32_t state = UTF8_ACCEPT;
-  if (validate_utf8(&state, input, size) == UTF8_REJECT)
-  {
-    fprintf(stderr, "[-] Invalid UTF-8 data\n");
-    return 0;
-  }
-  else
-  {
-    printf("[i] Valid UTF-8 string\n");
-  }
-
-  if (!is_ascii_str((char *)input, size))
-  {
-    fprintf(stderr, "[-] Invalid ASCII data\n");
-    return 0;
-  }
-  else
-  {
-    printf("[i] Valid ASCII string\n");
-  }
-
-  Functions *functions = load_functions();
-  printf("[+] Functions loaded\n");
-  ParserResult *parser_result = (ParserResult *)malloc(sizeof(ParserResult));
-  String *url = (String *)malloc(sizeof(String));
-  // functions->binder_getInstance();
-  // functions->binder_init();
-  functions->copy_jni_string_from_str(url, input);
-  functions->parse_link(parser_result, url);
-  free(input);
-  free(parser_result);
-  free(url);
-  free(functions);
-  close_libraries();
-  return 0;
+  return fuzz(data, size);
 }
 #else  // TRIAGE
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
@@ -187,41 +191,6 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
   // char data[] = {0x34, 0xf9, 0xf1, 0x65, 0x1, 0x1};
   // char data[] = "🇮🇩";
   // size_t size = sizeof(data);
-
-  uint32_t state = UTF8_ACCEPT;
-  if (validate_utf8(&state, (char *)data, size) == UTF8_REJECT)
-  {
-    fprintf(stderr, "[-] Invalid UTF-8 data\n");
-    return 0;
-  }
-  else
-  {
-    printf("[i] Valid UTF-8 string\n");
-  }
-
-  if (!is_ascii_str((char *)data, size))
-  {
-    fprintf(stderr, "[-] Invalid ASCII data\n");
-    return 0;
-  }
-  else
-  {
-    printf("[i] Valid ASCII string\n");
-  }
-
-  Functions *functions = load_functions();
-  printf("[+] Functions loaded\n");
-  ParserResult *parser_result = (ParserResult *)malloc(sizeof(ParserResult));
-  String *url = (String *)malloc(sizeof(String));
-  char *input = (char *)malloc(size + 1);
-  memcpy(input, data, size);
-  input[size] = 0;
-  functions->copy_jni_string_from_str(url, input);
-  functions->parse_link(parser_result, url);
-  free(input);
-  free(parser_result);
-  free(url);
-  free(functions);
-  return 0;
+  return fuzz(data, size);
 }
 #endif // TRIAGE
