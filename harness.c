@@ -106,7 +106,6 @@ void close_libraries()
   dlclose(LIBC_SHARED);
 }
 
-#define TRIAGE
 #ifdef TRIAGE
 int main(int argc, char *argv[])
 {
@@ -130,23 +129,22 @@ int main(int argc, char *argv[])
   return 0;
 }
 #else  // TRIAGE
-// int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
-int main(int argc, char *argv[])
+int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+// int main(int argc, char *argv[])
 {
+  // char data[] = {0x34, 0xf9, 0xf1, 0x65, 0x1, 0x1};
+  // size_t size = 6;
 
   Functions *functions = load_functions();
   printf("[+] Functions loaded\n");
   ParserResult *parser_result = (ParserResult *)malloc(sizeof(ParserResult));
   String *url = (String *)malloc(sizeof(String));
-  // char *input = (char *)malloc(size + 1);
-  // memcpy(input, data, size);
-  // input[size] = 0;
-  char input[] = {0x34, 0xf9, 0xf1, 0x65, 0x1, 0x0};
-  // functions->binder_getInstance();
-  // functions->binder_init();
+  char *input = (char *)malloc(size + 1);
+  memcpy(input, data, size);
+  input[size] = 0;
   functions->copy_jni_string_from_str(url, input);
   functions->parse_link(parser_result, url);
-  // free(input);
+  free(input);
   free(parser_result);
   free(url);
   free(functions);
