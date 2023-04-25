@@ -51,7 +51,7 @@ void set_icu_version(ptrdiff_t binder_init_addr)
 {
   ptrdiff_t diff = g_ICU_VERSION - ICU_SQLITE_ANDROID_BINDER__INIT;
   ptrdiff_t version_addr = binder_init_addr + diff;
-  printf("original ICU_VERSION = %X\n", *(uint32_t *)version_addr);
+  printf("[i] original ICU_VERSION = %X\n", *(uint32_t *)version_addr);
   *(uint32_t *)version_addr = ICU_VERSION;
   return;
 }
