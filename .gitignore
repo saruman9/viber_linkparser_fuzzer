@@ -1,5 +1,12 @@
+# Cargo
 target
+
+# Build artifacts
 libafl_frida
-LibAFL
+harness
 *.o
 *.so
+
+# External crates
+frida-rust
+LibAFL
