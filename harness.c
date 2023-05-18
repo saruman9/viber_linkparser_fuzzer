@@ -133,7 +133,14 @@ int fuzz(const uint8_t *data, size_t size)
   }
 
   Functions *functions = load_functions();
-  printf("[+] Functions loaded\n");
+  if (functions != NULL)
+  {
+    printf("[+] Functions loaded\n");
+  }
+  else
+  {
+    exit(2);
+  }
   ParserResult *parser_result = (ParserResult *)malloc(sizeof(ParserResult));
   String *url = (String *)malloc(sizeof(String));
   functions->copy_jni_string_from_str(url, input);
