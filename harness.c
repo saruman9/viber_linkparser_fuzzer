@@ -38,8 +38,6 @@ typedef struct Functions
 {
   void (*parse_link)(struct ParserResult *, struct String *);
   void (*copy_jni_string_from_str)(struct String *, const char *);
-  // void (*binder_getInstance)();
-  // void (*binder_init)();
 } Functions;
 
 int afl_libfuzzer_init()
@@ -64,10 +62,9 @@ struct Functions *load_functions()
   if (LIBLINKPARSER != NULL && LIBC_SHARED != NULL && LIBICU_BINDER != NULL)
   {
     int (*JNI_OnLoad)(void *, void *) = dlsym(LIBLINKPARSER, "JNI_OnLoad");
-    // void (*binder_getInstance)() = dlsym(LIBICU_BINDER, "_ZN22IcuSqliteAndroidBinder11getInstanceEv");
     void (*binder_init)() = dlsym(LIBICU_BINDER, "_ZN22IcuSqliteAndroidBinder4initEv");
 
-    if (JNI_OnLoad != NULL && binder_init != NULL /* && binder_getInstance != NULL */)
+    if (JNI_OnLoad != NULL && binder_init != NULL)
     {
       Dl_info jni_on_load_info;
       dladdr(JNI_OnLoad, &jni_on_load_info);
@@ -91,8 +88,6 @@ struct Functions *load_functions()
         Functions *functions = (Functions *)malloc(sizeof(Functions));
         functions->parse_link = parse_link;
         functions->copy_jni_string_from_str = copy_jni_string_from_str;
-        // functions->binder_getInstance = binder_getInstance;
-        // functions->binder_init = binder_init;
         return functions;
       }
       else
@@ -137,16 +132,6 @@ int fuzz(const uint8_t *data, size_t size)
     printf("[i] Valid UTF-8 string\n");
   }
 
-  // if (!is_ascii_str((char *)data, size))
-  // {
-  //   fprintf(stderr, "[-] Invalid ASCII data\n");
-  //   return 0;
-  // }
-  // else
-  // {
-  //   printf("[i] Valid ASCII string\n");
-  // }
-
   Functions *functions = load_functions();
   printf("[+] Functions loaded\n");
   ParserResult *parser_result = (ParserResult *)malloc(sizeof(ParserResult));
@@ -186,11 +171,7 @@ int main(int argc, char *argv[])
 }
 #else  // TRIAGE
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
-// int main(int argc, char *argv[])
 {
-  // char data[] = {0x34, 0xf9, 0xf1, 0x65, 0x1, 0x1};
-  // char data[] = "🇮🇩";
-  // size_t size = sizeof(data);
   return fuzz(data, size);
 }
 #endif // TRIAGE
