@@ -11,8 +11,9 @@ Here you can find an example of a fuzzer implementation for the library `liblink
 5. Build the harness:
    - `x86_64-linux-android-clang -O3 harness.c -shared -o harness.so` (for fuzzing)
    - `x86_64-linux-android-clang -DTRIAGE -O0 harness.c -o harness` (for triaging and debugging)
-6. `adb push libc++_shared.so libicuBinder.so liblinkparser.so /data/local/tmp`
-7. `adb push ./target/x86_64-linux-android/release/frida_fuzzer harness.so /data/local/tmp`
+6. Libraries: `adb push libc++_shared.so libicuBinder.so liblinkparser.so /data/local/tmp`
+7. The fuzzer: `adb push ./target/x86_64-linux-android/release/frida_fuzzer harness.so /data/local/tmp`
+8. The corpus: `adb push ./corpus /data/local/tmp`
 
 ## Using
 
