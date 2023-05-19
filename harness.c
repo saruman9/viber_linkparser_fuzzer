@@ -49,7 +49,9 @@ void set_icu_version(ptrdiff_t binder_init_addr)
 {
   ptrdiff_t diff = g_ICU_VERSION - ICU_SQLITE_ANDROID_BINDER__INIT;
   ptrdiff_t version_addr = binder_init_addr + diff;
+#ifdef TRIAGE
   printf("[i] original ICU_VERSION = %X\n", *(uint32_t *)version_addr);
+#endif
   *(uint32_t *)version_addr = ICU_VERSION;
   return;
 }
@@ -79,8 +81,10 @@ struct Functions *load_functions()
       int diff_copy_jni_string_from_str = ADDR_COPY_JNI_STRING_FROM_STR - ADDR_JNI_ONLOAD;
       size_t parse_link_addr = jni_on_load_addr + diff_parse_link;
       size_t copy_jni_string_from_str_addr = jni_on_load_addr + diff_copy_jni_string_from_str;
+#ifdef TRIAGE
       printf("[i] parse_link_addr: %zX\n", parse_link_addr);
       printf("[i] copy_jni_string_from_str_addr: %zX\n", copy_jni_string_from_str_addr);
+#endif
       void (*parse_link)(ParserResult *, String *) = (void (*)(ParserResult *, String *))(parse_link_addr);
       void (*copy_jni_string_from_str)(String *, const char *) = (void (*)(String *, const char *))(copy_jni_string_from_str_addr);
       if (parse_link != NULL && copy_jni_string_from_str != NULL)
@@ -124,18 +128,24 @@ int fuzz(const uint8_t *data, size_t size)
 
   if (!validate_utf8(input, size + 1))
   {
+#ifdef TRIAGE
     fprintf(stderr, "[-] Invalid UTF-8 data\n");
+#endif
     return 0;
   }
   else
   {
+#ifdef TRIAGE
     printf("[i] Valid UTF-8 string\n");
+#endif
   }
 
   Functions *functions = load_functions();
   if (functions != NULL)
   {
+#ifdef TRIAGE
     printf("[+] Functions loaded\n");
+#endif
   }
   else
   {
