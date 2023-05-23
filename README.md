@@ -22,7 +22,7 @@ See `cargo run -- --help`.
 For example,
 
 ```shell
-./frida_fuzzer -c 6 -A -H ./harness.so --asan-cores=1,2 -F fuzz -l ./harness.so -l ./liblinkparser.so -l ./libicuBinder.so -C --cmplog-cores=3,4 -d
+./frida_fuzzer -c 0-6 -A -H ./harness.so --asan-cores=0,1 -F fuzz -l ./harness.so -l ./liblinkparser.so -l ./libicuBinder.so -C --cmplog-cores=2,3 -d
 ```
 
 or debug mode:
