@@ -149,7 +149,7 @@ int fuzz(const uint8_t *data, size_t size)
   }
   else
   {
-    exit(2);
+    abort();
   }
   ParserResult *parser_result = (ParserResult *)malloc(sizeof(ParserResult));
   String *url = (String *)malloc(sizeof(String));
