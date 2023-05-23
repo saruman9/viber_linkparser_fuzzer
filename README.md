@@ -28,5 +28,5 @@ For example,
 or debug mode:
 
 ```shell
-COLORBT_SHOW_HIDDEN=1 RUST_BACKTRACE=full LD_LIBRARY_PATH=. LIBAFL_DEBUG_OUTPUT=1 ./frida_fuzzer -H ./harness.so -F fuzz -l ./harness.so -l ./liblinkparser.so -l ./libicuBinder.so
+RUST_BACKTRACE=1 LD_LIBRARY_PATH=. LIBAFL_DEBUG_OUTPUT=1 RUST_LOG=info ./frida_fuzzer -H ./harness.so -F fuzz -l ./harness.so -l ./liblinkparser.so -l ./libicuBinder.so
 ```
