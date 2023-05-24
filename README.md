@@ -12,18 +12,18 @@ Here you can find an example of a fuzzer implementation for the library `liblink
 6. Build the harness:
    - For fuzzing:
    ```console
-   cmake -B build -S . -DANDROID_PLATFORM=${YOUR_ANDROID_PLATFORM_NUMBER_HERE} \
+   $ cmake -B build -S . -DANDROID_PLATFORM=${YOUR_ANDROID_PLATFORM_NUMBER_HERE} \
       -DCMAKE_TOOLCHAIN_FILE=${SPECIFIC_ANDROID_NDK_TOOLCHAIN_PATH_HERE}/build/cmake/android.toolchain.cmake \
       -DANDROID_ABI=x86_64
-   cmake --build build
+   $ cmake --build build
    ```
 
    - For triaging and debugging:
    ```console
-   cmake -B build -S . -DTRIAGE -DANDROID_PLATFORM=${YOUR_ANDROID_PLATFORM_NUMBER_HERE} \
+   $ cmake -B build -S . -DTRIAGE -DANDROID_PLATFORM=${YOUR_ANDROID_PLATFORM_NUMBER_HERE} \
       -DCMAKE_TOOLCHAIN_FILE=${SPECIFIC_ANDROID_NDK_TOOLCHAIN_PATH_HERE}/build/cmake/android.toolchain.cmake \
       -DANDROID_ABI=x86_64
-   cmake --build build
+   $ cmake --build build
    ```
 7. Copy everything to the device or to the emulator:
 
