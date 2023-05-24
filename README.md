@@ -8,12 +8,28 @@ Here you can find an example of a fuzzer implementation for the library `liblink
 2. Make sure that the paths to cross-compiler are listed in the `PATH` environment variable.
 3. `rustup target add x86_64-linux-android`
 4. `cargo build --release --target=x86_64-linux-android`
-5. Build the harness:
-   - `x86_64-linux-android-clang -O3 harness.c -shared -o harness.so` (for fuzzing)
-   - `x86_64-linux-android-clang -DTRIAGE -O0 harness.c -o harness` (for triaging and debugging)
-6. Libraries: `adb push libc++_shared.so libicuBinder.so liblinkparser.so /data/local/tmp`
-7. The fuzzer: `adb push ./target/x86_64-linux-android/release/frida_fuzzer harness.so /data/local/tmp`
-8. The corpus: `adb push ./corpus /data/local/tmp`
+5. Copy the shared dependency libraries to the `lib` directory.
+6. Build the harness:
+   - For fuzzing:
+   ```console
+   cmake -B build -S . -DANDROID_PLATFORM=${YOUR_ANDROID_PLATFORM_NUMBER_HERE} \
+      -DCMAKE_TOOLCHAIN_FILE=${SPECIFIC_ANDROID_NDK_TOOLCHAIN_PATH_HERE}/build/cmake/android.toolchain.cmake \
+      -DANDROID_ABI=x86_64
+   cmake --build build
+   ```
+
+   - For triaging and debugging:
+   ```console
+   cmake -B build -S . -DTRIAGE -DANDROID_PLATFORM=${YOUR_ANDROID_PLATFORM_NUMBER_HERE} \
+      -DCMAKE_TOOLCHAIN_FILE=${SPECIFIC_ANDROID_NDK_TOOLCHAIN_PATH_HERE}/build/cmake/android.toolchain.cmake \
+      -DANDROID_ABI=x86_64
+   cmake --build build
+   ```
+7. Copy everything to the device or to the emulator:
+
+```shell
+adb push ./corpus ./lib/* ./build/*harness* ./target/x86_64-linux-android/release/frida_fuzzer /data/local/tmp
+```
 
 ## Using
 
