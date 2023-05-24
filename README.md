@@ -38,11 +38,11 @@ See `cargo run -- --help`.
 For example,
 
 ```shell
-./frida_fuzzer -c 0-6 -A -H ./harness.so --asan-cores=0,1 -F fuzz -l ./harness.so -l ./liblinkparser.so -l ./libicuBinder.so -C --cmplog-cores=2,3 -d
+./frida_fuzzer -c 0-6 -A -H ./libharness.so --asan-cores=0,1 -F fuzz -l ./libharness.so -l ./liblinkparser.so -l ./libicuBinder.so -C --cmplog-cores=2,3 -d
 ```
 
 or debug mode:
 
 ```shell
-RUST_BACKTRACE=1 LD_LIBRARY_PATH=. LIBAFL_DEBUG_OUTPUT=1 RUST_LOG=info ./frida_fuzzer -H ./harness.so -F fuzz -l ./harness.so -l ./liblinkparser.so -l ./libicuBinder.so
+RUST_BACKTRACE=1 LIBAFL_DEBUG_OUTPUT=1 RUST_LOG=debug ./frida_fuzzer -H ./libharness.so -F fuzz -l ./libharness.so -l ./liblinkparser.so -l ./libicuBinder.so
 ```
