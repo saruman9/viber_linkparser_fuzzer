@@ -515,8 +515,12 @@ unsafe fn fuzz(options: &FuzzerOptions) -> Result<(), Error> {
                 if state.must_load_initial_inputs() {
                     state
                         .load_initial_inputs(&mut fuzzer, &mut executor, &mut mgr, &options.input)
-                        .unwrap_or_else(|_| {
-                            panic!("Failed to load initial corpus at {:?}", &options.input)
+                        .unwrap_or_else(|err| {
+                            panic!(
+                                "Failed to load initial corpus at {:?} ({})",
+                                &options.input,
+                                err.to_string(),
+                            )
                         });
                     println!("We imported {} inputs from disk.", state.corpus().count());
                 }
