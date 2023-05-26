@@ -1027,6 +1027,7 @@ checksum = "830d08ce1d1d941e6b30645f1a0eb5643013d835ce3779a5fc208261dbe10f55"
 [[package]]
 name = "libafl"
 version = "0.10.1"
+source = "git+https://github.com/saruman9/LibAFL#9307c849a7b105efd4a281bc0e2da5d8861784d0"
 dependencies = [
  "ahash",
  "backtrace",
@@ -1071,6 +1072,7 @@ dependencies = [
 [[package]]
 name = "libafl_derive"
 version = "0.10.1"
+source = "git+https://github.com/saruman9/LibAFL#9307c849a7b105efd4a281bc0e2da5d8861784d0"
 dependencies = [
  "quote",
  "syn 2.0.15",
@@ -1079,6 +1081,7 @@ dependencies = [
 [[package]]
 name = "libafl_frida"
 version = "0.10.1"
+source = "git+https://github.com/saruman9/LibAFL#9307c849a7b105efd4a281bc0e2da5d8861784d0"
 dependencies = [
  "ahash",
  "backtrace",
@@ -1104,6 +1107,7 @@ dependencies = [
 [[package]]
 name = "libafl_targets"
 version = "0.10.1"
+source = "git+https://github.com/saruman9/LibAFL#9307c849a7b105efd4a281bc0e2da5d8861784d0"
 dependencies = [
  "cc",
  "libafl",

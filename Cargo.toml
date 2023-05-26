@@ -15,10 +15,10 @@ opt-level = 3
 debug = true
 
 [dependencies]
-libafl = { path = "LibAFL/libafl/", features = [ "std", "llmp_compression", "llmp_bind_public", "frida_cli" ] } #,  "llmp_small_maps", "llmp_debug"]}
+libafl = { git = "https://github.com/saruman9/LibAFL", features = [ "std", "llmp_compression", "llmp_bind_public", "frida_cli" ] } #,  "llmp_small_maps", "llmp_debug"]}
 frida-gum = { version = "0.8.1", features = [ "auto-download", "event-sink", "invocation-listener" ] }
-libafl_frida = { path = "LibAFL/libafl_frida", features = [ "cmplog" ] }
-libafl_targets = { path = "LibAFL/libafl_targets", features = [ "sancov_cmplog" ] }
+libafl_frida = { git = "https://github.com/saruman9/LibAFL", features = [ "cmplog" ] }
+libafl_targets = { git = "https://github.com/saruman9/LibAFL", features = [ "sancov_cmplog" ] }
 libloading = "0.8.0"
 mimalloc = { version = "0.1.37", default-features = false }
 color-backtrace = "0.5.1"
