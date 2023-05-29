@@ -3,7 +3,7 @@ project(harness)
 
 option(TRIAGE "Triaging" OFF)
 
-link_directories(${CMAKE_SOURCE_DIR}/lib)
+link_directories(${CMAKE_SOURCE_DIR}/lib/x86_64)
 
 if(TRIAGE)
     add_definitions(-DTRIAGE)
